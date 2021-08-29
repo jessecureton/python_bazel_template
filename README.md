@@ -6,6 +6,7 @@ wherever possible projects should be hermetic and reproducible. It includes:
 - Python test helpers to simplify unit test targets
 - Hermetic Python toolchain
 - Hermetic pip dependencies sourced from requirements.txt
+- Python Docker image support, including a matching runtime version as the hermetic toolchain.
 
 It does not seek to provide a continual submodule that can pick up upstream changes from the
 template, but is more like a `create-react-app` template where you can eject from the template

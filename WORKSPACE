@@ -5,11 +5,10 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-git_repository(
+http_archive(
     name = "rules_python",
-    commit = "6135186f93d46ab8551d9fe52bac97bf0c2de1ab",
-    remote = "https://github.com/bazelbuild/rules_python.git",
-    shallow_since = "1613499313 +0100",
+    sha256 = "934c9ceb552e84577b0faf1e5a2f0450314985b4d8712b2b70717dc679fdc01b",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.3.0/rules_python-0.3.0.tar.gz",
 )
 
 ########################################
@@ -48,17 +47,31 @@ pip_install(
 #    - https://thethoughtfulkoala.com/posts/2020/05/16/bazel-hermetic-python.html
 ########################################
 
+PY_VERSION = "3.9.2"
+
+BUILD_DIR = "/tmp/bazel-python-{0}".format(PY_VERSION)
+
 # Special logic for building python interpreter with OpenSSL from homebrew.
 # See https://devguide.python.org/setup/#macos-and-os-x
 # Note: Enabling optimizations yields a pretty snappy Python3 instance
 # However if it causes problems please disable rather than try and solve them (for your own sanity)
 _py_configure = """
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    ./configure --prefix=$(pwd)/bazel_install --with-openssl=$(brew --prefix openssl) --enable-optimizations
+    cd {0} && ./configure --prefix={0}/bazel_install --with-openssl=$(brew --prefix openssl) --enable-optimizations
 else
-    ./configure --prefix=$(pwd)/bazel_install --enable-optimizations
+    cd {0} && ./configure --prefix={0}/bazel_install --enable-optimizations
 fi
-"""
+""".format(BUILD_DIR)
+
+# MacOS `ar` does not support deterministic mode (the -D flag).
+# We'll just sorta handwave around the implications of this for hermeticity there for now.
+_py_make = """
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    cd {0} && SOURCE_DATE_EPOCH=0 make -j $(nproc) ARFLAGS='rv'
+else
+    cd {0} && SOURCE_DATE_EPOCH=0 make -j $(nproc) ARFLAGS='rvD'
+fi
+""".format(BUILD_DIR)
 
 http_archive(
     name = "python_interpreter",
@@ -71,17 +84,29 @@ filegroup(
 )
 """,
     patch_cmds = [
-        "mkdir $(pwd)/bazel_install",
+        # Create a build directory outside of bazel so we get consistent path in
+        # the generated files. See kku1993/bazel-hermetic-python#8
+        "mkdir -p {0}".format(BUILD_DIR),
+        "cp -r * {0}".format(BUILD_DIR),
+        # Build python.
         _py_configure,
-        "make -j",
-        "make install",
+        # Produce deterministic binary by using a fixed build timestamp and
+        # running `ar` in deterministic mode. See kku1993/bazel-hermetic-python#7
+        _py_make,
+        "cd {0} && make install".format(BUILD_DIR),
+        # Copy the contents of the build directory back into bazel.
+        "rm -rf * && mv {0}/* .".format(BUILD_DIR),
         "ln -s bazel_install/bin/python3 python_bin",
     ],
     sha256 = "3c2034c54f811448f516668dce09d24008a0716c3a794dd8639b5388cbde247d",
-    strip_prefix = "Python-3.9.2",
-    urls = ["https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz"],
+    strip_prefix = "Python-{0}".format(PY_VERSION),
+    urls = ["https://www.python.org/ftp/python/{0}/Python-{0}.tar.xz".format(PY_VERSION)],
 )
 
+# We have to register our in-container toolchain prior to registering the hermetic toolchain,
+# otherwise since the hermetic toolchain defines no constraints it will end up running in the
+# container, which breaks on macOS
+register_toolchains("//:container_py_toolchain")
 register_toolchains("//:hermetic_py_toolchain")
 
 ########################################
@@ -94,27 +119,30 @@ register_toolchains("//:hermetic_py_toolchain")
 ########################################
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "6f111c57fd50baf5b8ee9d63024874dd2a014b069426156c55adbf6d3d22cb7b",
+    sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.25.0/rules_go-v0.25.0.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.25.0/rules_go-v0.25.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "b85f48fa105c4403326e9525ad2b2cc437babaa6e15a3fc0b1dbab0ab064bc7c",
+    sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.22.2/bazel-gazelle-v0.22.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.22.2/bazel-gazelle-v0.22.2.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
     ],
 )
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-    strip_prefix = "protobuf-3.11.4",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
+    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
+    strip_prefix = "protobuf-3.14.0",
+    urls = [
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+    ],
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
@@ -123,7 +151,7 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.15.5")
+go_register_toolchains(version = "1.16.5")
 
 gazelle_dependencies()
 
@@ -134,7 +162,64 @@ protobuf_deps()
 ########################################
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "f5b666935a827bc2b6e2ca86ea56c796d47f2821c2ff30452d270e51c2a49708",
-    strip_prefix = "buildtools-3.5.0",
-    url = "https://github.com/bazelbuild/buildtools/archive/3.5.0.zip",
+    sha256 = "932160d5694e688cb7a05ac38efba4b9a90470c75f39716d85fb1d2f95eec96d",
+    strip_prefix = "buildtools-4.0.1",
+    url = "https://github.com/bazelbuild/buildtools/archive/4.0.1.zip",
 )
+
+########################################
+# Set up rules_docker
+########################################
+http_archive(
+    name = "io_bazel_rules_docker",
+    sha256 = "59d5b42ac315e7eadffa944e86e90c2990110a1c8075f1cd145f487e999d22b3",
+    strip_prefix = "rules_docker-0.17.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.17.0/rules_docker-v0.17.0.tar.gz"],
+)
+
+load(
+    "@io_bazel_rules_docker//repositories:repositories.bzl",
+    container_repositories = "repositories",
+)
+
+container_repositories()
+
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
+
+container_deps()
+
+load(
+    "@io_bazel_rules_docker//python3:image.bzl",
+    _py_image_repos = "repositories",
+)
+
+load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
+
+container_pull(
+    name = "_hermetic_python_base_image_base",
+    registry = "docker.io",
+    repository = "library/python",
+    tag = "{0}-alpine".format(PY_VERSION),
+)
+
+
+########################################
+# Set up rules_pkg
+########################################
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_pkg",
+    sha256 = "038f1caa773a7e35b3663865ffb003169c6a71dc995e39bf4815792f385d837d",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.4.0/rules_pkg-0.4.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.4.0/rules_pkg-0.4.0.tar.gz",
+    ],
+)
+
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
+rules_pkg_dependencies()
+
+_py_image_repos()

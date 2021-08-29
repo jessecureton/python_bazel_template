@@ -1,4 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
 
 # These rules exist primarily as a way to provide a simple `main` wrapper for
 # py_test rules, so we don't have to provide a main stub for every test target.
@@ -45,3 +46,7 @@ def ${project}_py_library(*args, **kwargs):
 
 def ${project}_py_binary(*args, **kwargs):
     py_binary(*args, **kwargs)
+
+def ${project}_py_image(**kwargs):
+    base = kwargs.pop("base", None) or "//:hermetic_python_base_image"
+    py3_image(base=base, **kwargs)
