@@ -107,6 +107,7 @@ filegroup(
 # otherwise since the hermetic toolchain defines no constraints it will end up running in the
 # container, which breaks on macOS
 register_toolchains("//:container_py_toolchain")
+
 register_toolchains("//:hermetic_py_toolchain")
 
 ########################################
@@ -192,7 +193,6 @@ load(
     "@io_bazel_rules_docker//python3:image.bzl",
     _py_image_repos = "repositories",
 )
-
 load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
 
 container_pull(
@@ -201,7 +201,6 @@ container_pull(
     repository = "library/python",
     tag = "{0}-alpine".format(PY_VERSION),
 )
-
 
 ########################################
 # Set up rules_pkg
