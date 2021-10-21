@@ -34,10 +34,25 @@ Pull requests are welcome! Open one against this repo and it will be reviewed & 
 
 In general, lint by running the `lint.sh` script.
 
+The first time you run lint, you'll see a warning like:
+```
+UserWarning: `known_${project}` setting is defined, but ${project} is not included in `sections`
+config option: ('FUTURE', 'STDLIB', 'THIRDPARTY', '${project}', 'FIRSTPARTY', 'LOCALFOLDER').
+```
+To resolve this, open `pyproject.toml` in the repo root, and update the `<project>` reference in
+`SECTIONS` on line 11 to be capitalized. This is a known issue with the basic templating script
+used in the repo, and PRs are welcome if you have a resolution :)
+
 You can manually run ${Buildifier/Flake8/Black/Isort} with the following if you want to, though
 you'll have to handle paths manually to prevent them from working on the Bazel sandbox.
 
 - `bazel run //tools/${tool}`
+
+## Testing
+
+Unit tests are run using the `bazel test` command. A test wrapper is provided that invokes `pytest`
+with reasonable defaults and configures the entrypoint. You just write pytest test cases in normal
+Python files, and pass these as `srcs` to a `${project}_py_test` rule. The test runner handles the rest.
 
 ## Language Support
 
