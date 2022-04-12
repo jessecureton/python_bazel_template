@@ -47,7 +47,7 @@ pip_install(
 #    - https://thethoughtfulkoala.com/posts/2020/05/16/bazel-hermetic-python.html
 ########################################
 
-PY_VERSION = "3.9.2"
+PY_VERSION = "3.9.12"
 
 BUILD_DIR = "/tmp/bazel-python-{0}".format(PY_VERSION)
 
@@ -98,7 +98,7 @@ filegroup(
         "rm -rf * && mv {0}/* .".format(BUILD_DIR),
         "ln -s bazel_install/bin/python3 python_bin",
     ],
-    sha256 = "3c2034c54f811448f516668dce09d24008a0716c3a794dd8639b5388cbde247d",
+    sha256 = "2cd94b20670e4159c6d9ab57f91dbf255b97d8c1a1451d1c35f4ec1968adf971",
     strip_prefix = "Python-{0}".format(PY_VERSION),
     urls = ["https://www.python.org/ftp/python/{0}/Python-{0}.tar.xz".format(PY_VERSION)],
 )
