@@ -80,4 +80,15 @@ else
 fi
 
 msg "Updating all references to ${SOURCE_ARG} to ${DEST_ARG}"
-find ${REPO_ROOT} -type f -not -path "${REPO_ROOT}/.git/*" -not -path "${REPO_ROOT}/eject.sh" -exec sed -i "" -e "s/${SOURCE_ARG}/${DEST_ARG}/g" {} \;
+
+# MacOS and GNU sed handle the `-i` argument for in-place edits differently
+INPLACEOPT="-i"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SEDOPTION="-i ''"
+fi
+
+find ${REPO_ROOT} \
+    -type f \
+    -not -path "${REPO_ROOT}/.git/*" \
+    -not -path "${REPO_ROOT}/eject.sh" \
+    -exec sed $INPLACEOPT -e "s/${SOURCE_ARG}/${DEST_ARG}/g" {} \;
