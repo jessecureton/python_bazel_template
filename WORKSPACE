@@ -108,11 +108,12 @@ pip_parse(
 
     # (Optional) You can set quiet to False if you want to see pip output.
     #quiet = False,
-
     requirements_lock = "//:requirements_lock.txt",
 )
+
 # Load the starlark macro which will define your dependencies.
 load("@pip//:requirements.bzl", "install_deps")
+
 # Call it to define repos for your requirements.
 install_deps()
 
@@ -126,29 +127,29 @@ install_deps()
 ########################################
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
+    sha256 = "099a9fb96a376ccbbb7d291ed4ecbdfd42f6bc822ab77ae6f1b5cb9e914e94fa",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.35.0/rules_go-v0.35.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.35.0/rules_go-v0.35.0.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
+    sha256 = "501deb3d5695ab658e82f6f6f549ba681ea3ca2a5fb7911154b5aa45596183fa",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.26.0/bazel-gazelle-v0.26.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.26.0/bazel-gazelle-v0.26.0.tar.gz",
     ],
 )
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
-    strip_prefix = "protobuf-3.14.0",
+    sha256 = "0aa7df8289c957a4c54cbe694fbabe99b180e64ca0f8fdb5e2f76dcf56ff2422",
+    strip_prefix = "protobuf-21.9",
     urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v21.9.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.9.tar.gz",
     ],
 )
 
@@ -158,7 +159,7 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.16.5")
+go_register_toolchains(version = "1.19.1")
 
 gazelle_dependencies()
 
