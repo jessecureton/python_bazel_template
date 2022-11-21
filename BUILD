@@ -30,7 +30,6 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/python:toolchain_type",
 )
 
-
 # Set up a container-local interpreter, since our container runtime has its own
 # equivalent hermetic runtime internally.
 py_runtime(
