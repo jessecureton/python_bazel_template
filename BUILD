@@ -1,6 +1,16 @@
 load("@rules_python//python:defs.bzl", "py_runtime_pair")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@io_bazel_rules_docker//container:image.bzl", "container_image")
 
+# Set up our pip requirements
+compile_pip_requirements(
+    name = "requirements",
+    #extra_args = ["--allow-unsafe"],
+    requirements_in = "requirements.in",
+    requirements_txt = "requirements_lock.txt",
+)
+
+# Set up our default python3 runtime
 py_runtime(
     name = "python3_runtime",
     files = ["@python_interpreter//:files"],
@@ -20,6 +30,9 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/python:toolchain_type",
 )
 
+
+# Set up a container-local interpreter, since our container runtime has its own
+# equivalent hermetic runtime internally.
 py_runtime(
     name = "container_python3_runtime",
     interpreter_path = "/usr/local/bin/python3",

@@ -7,37 +7,9 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 http_archive(
     name = "rules_python",
-    sha256 = "934c9ceb552e84577b0faf1e5a2f0450314985b4d8712b2b70717dc679fdc01b",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.3.0/rules_python-0.3.0.tar.gz",
-)
-
-########################################
-# Set up pip requirements rules
-########################################
-
-load("@rules_python//python:pip.bzl", "pip_install")
-
-pip_install(
-    # (Optional) You can provide extra parameters to pip.
-    # Here, make pip output verbose (this is usable with `quiet = False`).
-    #extra_pip_args = ["-v"],
-
-    # (Optional) You can exclude custom elements in the data section of the generated BUILD files for pip packages.
-    # Exclude directories with spaces in their names in this example (avoids build errors if there are such directories).
-    #pip_data_exclude = ["**/* */**"],
-
-    # (Optional) You can provide a python_interpreter (path) or a python_interpreter_target (a Bazel target, that
-    # acts as an executable). The latter can be anything that could be used as Python interpreter. E.g.:
-    # 1. Python interpreter that you compile in the build file (as above in @python_interpreter).
-    # 2. Pre-compiled python interpreter included with http_archive
-    # 3. Wrapper script, like in the autodetecting python toolchain.
-    python_interpreter_target = "@python_interpreter//:python_bin",
-
-    # (Optional) You can set quiet to False if you want to see pip output.
-    #quiet = False,
-
-    # Uses the default repository name "pip"
-    requirements = "//:requirements.txt",
+    sha256 = "a868059c8c6dd6ad45a205cca04084c652cfe1852e6df2d5aca036f6e5438380",
+    strip_prefix = "rules_python-0.14.0",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.14.0.tar.gz",
 )
 
 ########################################
@@ -109,6 +81,40 @@ filegroup(
 register_toolchains("//:container_py_toolchain")
 
 register_toolchains("//:hermetic_py_toolchain")
+
+########################################
+# Set up pip requirements rules
+########################################
+
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+pip_parse(
+    name = "pip",
+
+    # (Optional) You can provide extra parameters to pip.
+    # Here, make pip output verbose (this is usable with `quiet = False`).
+    #extra_pip_args = ["-v"],
+
+    # (Optional) You can exclude custom elements in the data section of the generated BUILD files for pip packages.
+    # Exclude directories with spaces in their names in this example (avoids build errors if there are such directories).
+    #pip_data_exclude = ["**/* */**"],
+
+    # (Optional) You can provide a python_interpreter (path) or a python_interpreter_target (a Bazel target, that
+    # acts as an executable). The latter can be anything that could be used as Python interpreter. E.g.:
+    # 1. Python interpreter that you compile in the build file (as above in @python_interpreter).
+    # 2. Pre-compiled python interpreter included with http_archive
+    # 3. Wrapper script, like in the autodetecting python toolchain.
+    python_interpreter_target = "@python_interpreter//:python_bin",
+
+    # (Optional) You can set quiet to False if you want to see pip output.
+    #quiet = False,
+
+    requirements_lock = "//:requirements_lock.txt",
+)
+# Load the starlark macro which will define your dependencies.
+load("@pip//:requirements.bzl", "install_deps")
+# Call it to define repos for your requirements.
+install_deps()
 
 ########################################
 # Prepare a hermetic Golang interpreter

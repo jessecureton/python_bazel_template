@@ -1,6 +1,0 @@
-black==22.3.0
-flake8==3.8.4
-isort==5.6.4
-ipdb==0.13.4
-notebook==6.2.0
-pytest==6.2.5
