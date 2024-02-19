@@ -12,79 +12,23 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
 )
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
 
 py_repositories()
 
-########################################
-# Prepare a hermetic python interpreter
-# See these links for details:
-#    - https://github.com/kku1993/bazel-hermetic-python
-#    - https://thethoughtfulkoala.com/posts/2020/05/16/bazel-hermetic-python.html
-########################################
+PY_VERSION = "3.11.6"
 
-PY_VERSION = "3.11.0"
-
-BUILD_DIR = "/tmp/bazel-python-{0}".format(PY_VERSION)
-
-# Special logic for building python interpreter with OpenSSL from homebrew.
-# See https://devguide.python.org/setup/#macos-and-os-x
-# Note: Enabling optimizations yields a pretty snappy Python3 instance
-# However if it causes problems please disable rather than try and solve them (for your own sanity)
-_py_configure = """
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    cd {0} && ./configure --prefix={0}/bazel_install --with-openssl=$(brew --prefix openssl) --enable-optimizations
-else
-    cd {0} && ./configure --prefix={0}/bazel_install --enable-optimizations
-fi
-""".format(BUILD_DIR)
-
-# MacOS `ar` does not support deterministic mode (the -D flag).
-# We'll just sorta handwave around the implications of this for hermeticity there for now.
-_py_make = """
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    cd {0} && SOURCE_DATE_EPOCH=0 make -j $(nproc) ARFLAGS='rv'
-else
-    cd {0} && SOURCE_DATE_EPOCH=0 make -j $(nproc) ARFLAGS='rvD'
-fi
-""".format(BUILD_DIR)
-
-http_archive(
-    name = "python_interpreter",
-    build_file_content = """
-exports_files(["python_bin"])
-filegroup(
-    name = "files",
-    srcs = glob(["bazel_install/**"], exclude = ["**/* *"]),
-    visibility = ["//visibility:public"],
-)
-""",
-    patch_cmds = [
-        # Create a build directory outside of bazel so we get consistent path in
-        # the generated files. See kku1993/bazel-hermetic-python#8
-        "mkdir -p {0}".format(BUILD_DIR),
-        "cp -r * {0}".format(BUILD_DIR),
-        # Build python.
-        _py_configure,
-        # Produce deterministic binary by using a fixed build timestamp and
-        # running `ar` in deterministic mode. See kku1993/bazel-hermetic-python#7
-        _py_make,
-        "cd {0} && make install".format(BUILD_DIR),
-        # Copy the contents of the build directory back into bazel.
-        "rm -rf * && mv {0}/* .".format(BUILD_DIR),
-        "ln -s bazel_install/bin/python3 python_bin",
-    ],
-    sha256 = "a57dc82d77358617ba65b9841cee1e3b441f386c3789ddc0676eca077f2951c3",
-    strip_prefix = "Python-{0}".format(PY_VERSION),
-    urls = ["https://www.python.org/ftp/python/{0}/Python-{0}.tar.xz".format(PY_VERSION)],
-)
+_SANI_PY_VERSION = PY_VERSION.replace(".", "_")
 
 # We have to register our in-container toolchain prior to registering the hermetic toolchain,
 # otherwise since the hermetic toolchain defines no constraints it will end up running in the
 # container, which breaks on macOS
 register_toolchains("//:container_py_toolchain")
 
-register_toolchains("//:hermetic_py_toolchain")
+python_register_toolchains(
+    name = "python" + _SANI_PY_VERSION,
+    python_version = PY_VERSION,
+)
 
 ########################################
 # Set up pip requirements rules
@@ -108,7 +52,7 @@ pip_parse(
     # 1. Python interpreter that you compile in the build file (as above in @python_interpreter).
     # 2. Pre-compiled python interpreter included with http_archive
     # 3. Wrapper script, like in the autodetecting python toolchain.
-    python_interpreter_target = "@python_interpreter//:python_bin",
+    python_interpreter_target = "@python" + _SANI_PY_VERSION + "_host//:python",
 
     # (Optional) You can set quiet to False if you want to see pip output.
     #quiet = False,

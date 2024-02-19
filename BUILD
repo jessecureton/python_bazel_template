@@ -10,26 +10,6 @@ compile_pip_requirements(
     requirements_txt = "requirements_lock.txt",
 )
 
-# Set up our default python3 runtime
-py_runtime(
-    name = "python3_runtime",
-    files = ["@python_interpreter//:files"],
-    interpreter = "@python_interpreter//:python_bin",
-    python_version = "PY3",
-)
-
-py_runtime_pair(
-    name = "hermetic_py_runtime_pair",
-    py2_runtime = None,
-    py3_runtime = ":python3_runtime",
-)
-
-toolchain(
-    name = "hermetic_py_toolchain",
-    toolchain = ":hermetic_py_runtime_pair",
-    toolchain_type = "@bazel_tools//tools/python:toolchain_type",
-)
-
 # Set up a container-local interpreter, since our container runtime has its own
 # equivalent hermetic runtime internally.
 py_runtime(
