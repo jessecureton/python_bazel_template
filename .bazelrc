@@ -1,6 +1,1 @@
 test --test_output=errors
-
-# The hermetic python interpreter we configure in WORKSPACE 
-# does not work with bzlmod enabled, so we just disable it
-# for now
-common --noenable_bzlmod

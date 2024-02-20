@@ -1,0 +1,32 @@
+module(name = "${project}")
+
+########################################
+# Setings
+########################################
+PY_VERSION = "3.11.6"
+_SANI_PY_VERSION = PY_VERSION.replace(".", "_")
+
+
+########################################
+# Set up rules_python and pip
+########################################
+bazel_dep(name = "rules_python", version = "0.31.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = PY_VERSION,
+    is_default = True,
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    requirements_lock = "//:requirements_lock.txt",
+    python_version = PY_VERSION,
+)
+use_repo(pip, "pip")
+
+########################################
+# Set up rules_pkg
+########################################
+bazel_dep(name = "rules_pkg", version = "0.10.1")

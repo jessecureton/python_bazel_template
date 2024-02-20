@@ -118,9 +118,9 @@ protobuf_deps()
 ########################################
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "932160d5694e688cb7a05ac38efba4b9a90470c75f39716d85fb1d2f95eec96d",
-    strip_prefix = "buildtools-4.0.1",
-    url = "https://github.com/bazelbuild/buildtools/archive/4.0.1.zip",
+    sha256 = "9a5df8cc8a3230f00583dc8dd6a8f5519246d845623632333253ec6b848070d7",
+    strip_prefix = "buildtools-6.4.0",
+    url = "https://github.com/bazelbuild/buildtools/archive/refs/tags/v6.4.0.zip",
 )
 
 ########################################
@@ -160,14 +160,11 @@ container_pull(
 # Set up rules_pkg
 ########################################
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 http_archive(
     name = "rules_pkg",
-    sha256 = "038f1caa773a7e35b3663865ffb003169c6a71dc995e39bf4815792f385d837d",
+    sha256 = "d250924a2ecc5176808fc4c25d5cf5e9e79e6346d79d5ab1c493e289e722d1d0",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.4.0/rules_pkg-0.4.0.tar.gz",
-        "https://github.com/bazelbuild/rules_pkg/releases/download/0.4.0/rules_pkg-0.4.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.10.1/rules_pkg-0.10.1.tar.gz",
     ],
 )
 
@@ -175,4 +172,5 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
 rules_pkg_dependencies()
 
+# Rules Docker somehow requires this to happen as the last line of the file
 _py_image_repos()
