@@ -1,5 +1,3 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 
 # We have to register our in-container toolchain prior to registering the hermetic toolchain,
 # otherwise since the hermetic toolchain defines no constraints it will end up running in the
