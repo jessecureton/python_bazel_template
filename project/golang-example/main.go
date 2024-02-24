@@ -5,6 +5,10 @@ import (
 	"runtime"
 )
 
+func GetVersion() string {
+	return fmt.Sprintf("Go version: %s", runtime.Version())
+}
+
 func main() {
-	fmt.Printf("Go version: %s\n", runtime.Version())
+	fmt.Println(GetVersion())
 }
