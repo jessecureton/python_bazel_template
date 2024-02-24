@@ -1,6 +1,6 @@
 load("@rules_python//python:defs.bzl", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
-load("@io_bazel_rules_docker//container:image.bzl", "container_image")
+#load("@io_bazel_rules_docker//container:image.bzl", "container_image")
 
 # Set up our pip requirements
 compile_pip_requirements(
@@ -33,17 +33,17 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/python:toolchain_type",
 )
 
-container_image(
-    name = "hermetic_python_base_image",
-    base = "@_hermetic_python_base_image_base//image",
-    # The `py3_image` rules hardcode an entrypoint of `/usr/bin/python`, rather than
-    # accounting for the in-container toolchain. This is dumb, but we can craft a
-    # symlink here manually to make a lightweight container like alpine work. The other
-    # alternative would be using `python3-buster` upstream images, but these roughly 15x
-    # the size of the container.
-    # See https://github.com/bazelbuild/rules_docker/issues/1247
-    symlinks = {
-        "/usr/bin/python": "/usr/local/bin/python",
-    },
-    visibility = ["//visibility:public"],
-)
+#container_image(
+#    name = "hermetic_python_base_image",
+#    base = "@_hermetic_python_base_image_base//image",
+#    # The `py3_image` rules hardcode an entrypoint of `/usr/bin/python`, rather than
+#    # accounting for the in-container toolchain. This is dumb, but we can craft a
+#    # symlink here manually to make a lightweight container like alpine work. The other
+#    # alternative would be using `python3-buster` upstream images, but these roughly 15x
+#    # the size of the container.
+#    # See https://github.com/bazelbuild/rules_docker/issues/1247
+#    symlinks = {
+#        "/usr/bin/python": "/usr/local/bin/python",
+#    },
+#    visibility = ["//visibility:public"],
+#)

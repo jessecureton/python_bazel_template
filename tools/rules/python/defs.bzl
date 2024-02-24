@@ -1,6 +1,6 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
-load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
+#load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
+#load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
 
 # These rules exist primarily as a way to provide a simple `main` wrapper for
 # py_test rules, so we don't have to provide a main stub for every test target.
@@ -62,11 +62,11 @@ def ${project}_py_binary(name, **kwargs):
     # Create an additional copy of the binary using the docker toolchain. This allows us to
     # hugely simplify ${project}_py_image and pass in an existing binary target, since it's
     # difficult to create a new binary with different parameters from an existing one.
-    py_binary(
-        name = name + "_docker_binary",
-        exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
-        **kwargs
-    )
+    #py_binary(
+    #name = name + "_docker_binary",
+    #exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
+    #**kwargs
+    #)
 
 def ${project}_py_image(name, binary = None, base = None, deps = [], layers = [], **kwargs):
     """
@@ -99,45 +99,47 @@ def ${project}_py_image(name, binary = None, base = None, deps = [], layers = []
             visibility = ["//visibility:public"],
         )
     """
+    pass
 
-    # If the user didn't provide a binary, configure a new one for them.
-    if binary == None:
-        binary = name + "_docker_binary"
-
-        py_binary(
-            name = binary,
-            python_version = "PY3",
-            deps = deps + layers,
-            exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
-            **kwargs
-        )
-    else:
-        # We can't use a provider in a macro, so instead we use the implicit output from the
-        # ${project}_py_binary that sets up an additional binary with the right toolchain
-        binary = binary + "_docker_binary"
-
-    # From here on out this is effectively identical to the upstream rules_docker py3_image macro
-
-    base = base or "//:hermetic_python_base_image"
-    tags = kwargs.get("tags", None)
-    for index, dep in enumerate(layers):
-        base = app_layer(name = "%s.%d" % (name, index), base = base, dep = dep, tags = tags)
-        base = app_layer(name = "%s.%d-symlinks" % (name, index), base = base, dep = dep, binary = binary, tags = tags)
-
-    visibility = kwargs.get("visibility", None)
-    app_layer(
-        name = name,
-        base = base,
-        entrypoint = ["/usr/bin/python"],
-        binary = binary,
-        visibility = visibility,
-        tags = tags,
-        args = kwargs.get("args"),
-        data = kwargs.get("data"),
-        testonly = kwargs.get("testonly"),
-        # The targets of the symlinks in the symlink layers are relative to the
-        # workspace directory under the app directory. Thus, create an empty
-        # workspace directory to ensure the symlinks are valid. See
-        # https://github.com/bazelbuild/rules_docker/issues/161 for details.
-        create_empty_workspace_dir = True,
-    )
+#
+#    # If the user didn't provide a binary, configure a new one for them.
+#    if binary == None:
+#        binary = name + "_docker_binary"
+#
+#        py_binary(
+#            name = binary,
+#            python_version = "PY3",
+#            deps = deps + layers,
+#            exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
+#            **kwargs
+#        )
+#    else:
+#        # We can't use a provider in a macro, so instead we use the implicit output from the
+#        # ${project}_py_binary that sets up an additional binary with the right toolchain
+#        binary = binary + "_docker_binary"
+#
+#    # From here on out this is effectively identical to the upstream rules_docker py3_image macro
+#
+#    base = base or "//:hermetic_python_base_image"
+#    tags = kwargs.get("tags", None)
+#    for index, dep in enumerate(layers):
+#        base = app_layer(name = "%s.%d" % (name, index), base = base, dep = dep, tags = tags)
+#        base = app_layer(name = "%s.%d-symlinks" % (name, index), base = base, dep = dep, binary = binary, tags = tags)
+#
+#    visibility = kwargs.get("visibility", None)
+#    app_layer(
+#        name = name,
+#        base = base,
+#        entrypoint = ["/usr/bin/python"],
+#        binary = binary,
+#        visibility = visibility,
+#        tags = tags,
+#        args = kwargs.get("args"),
+#        data = kwargs.get("data"),
+#        testonly = kwargs.get("testonly"),
+#        # The targets of the symlinks in the symlink layers are relative to the
+#        # workspace directory under the app directory. Thus, create an empty
+#        # workspace directory to ensure the symlinks are valid. See
+#        # https://github.com/bazelbuild/rules_docker/issues/161 for details.
+#        create_empty_workspace_dir = True,
+#    )

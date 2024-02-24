@@ -11,11 +11,11 @@ ${project}_py_binary(
     deps = [],
 )
 
-${project}_py_image(
-    name = "${project}_img",
-    binary = ":${project}",
-    visibility = ["//visibility:public"],
-)
+#${project}_py_image(
+#    name = "${project}_img",
+#    binary = ":${project}",
+#    visibility = ["//visibility:public"],
+#)
 
 ${project}_py_test(
     name = "${project}_test",
