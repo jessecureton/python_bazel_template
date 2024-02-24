@@ -4,7 +4,7 @@ module(name = "${project}")
 # Setings
 ########################################
 PY_VERSION = "3.11.6"
-_SANI_PY_VERSION = PY_VERSION.replace(".", "_")
+GO_VERSION = "1.22.0"
 
 
 ########################################
@@ -25,6 +25,28 @@ pip.parse(
     python_version = PY_VERSION,
 )
 use_repo(pip, "pip")
+
+########################################
+# Set up rules_go
+########################################
+bazel_dep(name = "rules_go", version = "0.46.0")
+bazel_dep(name = "gazelle", version = "0.35.0")
+
+go_sdk = use_extension("@rules_go//go:def.bzl", "go_sdk")
+go_sdk.download(version = GO_VERSION)
+go_sdk.host()
+
+########################################
+# Set up hermetic Buildifier tools
+########################################
+# This is helpful because the old version used an http_archive to fetch the buildtools
+# WORKSPACE, but it is incompatible with bzlmod Go toolchains. Instead let's just use
+# a prebuilt version.
+bazel_dep(
+    name = "buildifier_prebuilt",
+    version = "6.4.0",
+    dev_dependency = True,
+)
 
 ########################################
 # Set up rules_pkg

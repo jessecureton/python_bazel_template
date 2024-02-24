@@ -20,11 +20,10 @@ to update paths for your project.
    https://docs.bazel.build/versions/master/install.html
 2. Run the template eject script, providing your project's name. `./eject.sh <project_name>`
 
-Note to Linux users:
-* Python pip requires libssl-dev to be installed (sudo apt-get install libssl-dev).
-* `py_binary()` uses the host's Python as a bootstrap for execing the hermetic Python under Bazel.
-   If you only have python3 installed you will need to symlink python to python3
-   (i.e. ln -s /usr/bin/python3 /usr/bin/python)
+**Note to Linux users:**
+`py_binary()` uses the host's Python as a bootstrap for execing the hermetic Python under Bazel.
+If you only have python3 installed you will need to symlink python to python3 (i.e. ln -s
+/usr/bin/python3 /usr/bin/python)
 
 # Development
 
