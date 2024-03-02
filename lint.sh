@@ -29,6 +29,7 @@ BAZEL_FILES=$(find ${REPO_ROOT} -type f \
               -o -name "WORKSPACE.oss" \
               -o -name "WORKSPACE.*.bazel" \
               -o -name "WORKSPACE.*.oss" \) \
+              -o -name "MODULE.bazel" \
               -print)
 BUILDIFIER_ARGS=("-mode=fix" "-v=false")
 BUILDIFIER_INVOCATION="bazel run -- //tools/buildifier ${BUILDIFIER_ARGS[@]}"
