@@ -1,6 +1,8 @@
 load("@pip//:requirements.bzl", "requirement")
 load("//tools/rules/python:defs.bzl", "${project}_py_binary", "${project}_py_image", "${project}_py_test")
 
+# gazelle:prefix github.com/example/${project}
+
 ${project}_py_binary(
     name = "${project}",
     srcs = glob([

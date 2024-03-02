@@ -3,7 +3,7 @@ load("//tools/rules/golang:defs.bzl", "${project}_go_binary", "${project}_go_lib
 ${project}_go_library(
     name = "go_default_library",
     srcs = ["main.go"],
-    importpath = "github.com/example/${project}/${project}/golang-example",
+    importpath = "github.com/example/${project}/golang-example",
     visibility = ["//visibility:private"],
 )
 

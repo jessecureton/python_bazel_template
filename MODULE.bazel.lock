@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "e03901857f1b30700a2d683374550801f826b1e9dadb2436dd59c29af14ed007",
+  "moduleFileHash": "5f97b86c303dbacaf0a1e1ac3896356d7c0abfddf494692acd356a5a63cb2863",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -108,6 +108,18 @@
                 "line": 36,
                 "column": 16
               }
+            },
+            {
+              "tagName": "nogo",
+              "attributeValues": {
+                "nogo": "//:nogo"
+              },
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 37,
+                "column": 12
+              }
             }
           ],
           "hasDevUseExtension": false,
@@ -119,7 +131,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 38,
+            "line": 39,
             "column": 24
           },
           "imports": {
@@ -135,7 +147,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 39,
+                "line": 40,
                 "column": 18
               }
             }
@@ -2348,7 +2360,7 @@
             "ruleClassName": "go_register_nogo",
             "attributes": {
               "name": "rules_go~0.46.0~go_sdk~io_bazel_rules_nogo",
-              "nogo": "@io_bazel_rules_go//:default_nogo",
+              "nogo": "'@@//:nogo'",
               "includes": [
                 "'@@//:__subpackages__'"
               ],
