@@ -4,8 +4,8 @@ module(name = "${project}")
 # Setings
 ########################################
 PY_VERSION = "3.11.6"
-GO_VERSION = "1.22.0"
 
+GO_VERSION = "1.22.0"
 
 ########################################
 # Set up rules_python and pip
@@ -14,15 +14,15 @@ bazel_dep(name = "rules_python", version = "0.31.0")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
-    python_version = PY_VERSION,
     is_default = True,
+    python_version = PY_VERSION,
 )
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pip",
-    requirements_lock = "//:requirements_lock.txt",
     python_version = PY_VERSION,
+    requirements_lock = "//:requirements_lock.txt",
 )
 use_repo(pip, "pip")
 
@@ -39,6 +39,7 @@ go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
+    "com_github_stretchr_testify"
 )
 
 ########################################

@@ -1,6 +1,13 @@
+load("@gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:defs.bzl", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 #load("@io_bazel_rules_docker//container:image.bzl", "container_image")
+
+# gazelle:go_naming_convention go_default_library
+# gazelle:map_kind go_binary ${project}_go_binary //tools/rules/golang:defs.bzl
+# gazelle:map_kind go_library ${project}_go_library //tools/rules/golang:defs.bzl
+# gazelle:map_kind go_test ${project}_go_test //tools/rules/golang:defs.bzl
+gazelle(name = "gazelle")
 
 # Set up our pip requirements
 compile_pip_requirements(
