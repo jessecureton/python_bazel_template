@@ -1,6 +1,5 @@
 test --test_output=errors
-
-# The hermetic python interpreter we configure in WORKSPACE 
-# does not work with bzlmod enabled, so we just disable it
-# for now
-common --noenable_bzlmod
+common --enable_platform_specific_config
+build:linux --sandbox_add_mount_pair=/tmp
+build:macos --sandbox_add_mount_pair=/var/tmp
+build:windows --sandbox_add_mount_pair=C:\Temp

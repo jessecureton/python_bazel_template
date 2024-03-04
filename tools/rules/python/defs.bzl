@@ -1,6 +1,7 @@
+load("@aspect_bazel_lib//lib:tar.bzl", "mtree_spec", "tar")
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
-load("@io_bazel_rules_docker//lang:image.bzl", "app_layer")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 
 # These rules exist primarily as a way to provide a simple `main` wrapper for
 # py_test rules, so we don't have to provide a main stub for every test target.
@@ -59,85 +60,142 @@ def ${project}_py_binary(name, **kwargs):
     """
     py_binary(name = name, **kwargs)
 
-    # Create an additional copy of the binary using the docker toolchain. This allows us to
-    # hugely simplify ${project}_py_image and pass in an existing binary target, since it's
-    # difficult to create a new binary with different parameters from an existing one.
-    py_binary(
-        name = name + "_docker_binary",
-        exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
+def _py_layers(name, binary):
+    """
+    Create three layers for a py_binary target: interpreter, third-party dependencies, and application code.
+
+    This allows a container image to have smaller uploads, since the application layer usually changes more
+    than the other two.
+
+    Args:
+        name: Prefix for generated targets, to ensure they are unique within the package.
+        binary: The name of the ${project}_py_binary to bundle in the container.
+
+    Returns:
+        A list of labels for the layers, which are tar files
+    """
+    # Produce layers in this order, as the app changes most often
+    layers = ["interpreter", "packages", "app"]
+
+    # Produce the manifest for a tar file of our py_binary, but don't tar it up yet, so we can split
+    # into fine-grained layers for better docker performance.
+    mtree_spec(
+        name = name + ".mf",
+        srcs = [binary],
+    )
+
+    # match *only* external repositories that have the string "python"
+    # e.g. this will match
+    #   `/hello_world/hello_world_bin.runfiles/rules_python~0.21.0~python~python3_9_aarch64-unknown-linux-gnu/bin/python3`
+    # but not match
+    #   `/hello_world/hello_world_bin.runfiles/_main/python_app`
+    PY_INTERPRETER_REGEX = "\\.runfiles/.*python.*-.*"
+
+    # match *only* external pip like repositories that contain the string "site-packages"
+    SITE_PACKAGES_REGEX = "\\.runfiles/.*/site-packages/.*"
+
+    native.genrule(
+        name = name + ".interpreter_tar_manifest",
+        srcs = [name + ".mf"],
+        outs = [name + ".interpreter_tar_manifest.spec"],
+        cmd = "grep '{}' $< >$@".format(PY_INTERPRETER_REGEX),
+    )
+
+    native.genrule(
+        name = name + ".packages_tar_manifest",
+        srcs = [name + ".mf"],
+        outs = [name + ".packages_tar_manifest.spec"],
+        cmd = "grep '{}' $< >$@".format(SITE_PACKAGES_REGEX),
+    )
+
+    # Any lines that didn't match one of the two grep above
+    native.genrule(
+        name = name + ".app_tar_manifest",
+        srcs = [name + ".mf"],
+        outs = [name + ".app_tar_manifest.spec"],
+        cmd = "grep -v '{}' $< | grep -v '{}' >$@".format(SITE_PACKAGES_REGEX, PY_INTERPRETER_REGEX),
+    )
+
+    result = []
+    for layer in layers:
+        layer_target = "{}.{}_layer".format(name, layer)
+        result.append(layer_target)
+        tar(
+            name = layer_target,
+            srcs = [binary],
+            mtree = "{}.{}_tar_manifest".format(name, layer),
+        )
+
+    return result
+
+def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entrypoint = None, **kwargs):
+    """
+    A macro that generates an OCI container image to run a py_binary target.
+
+    The created target can be passed on to anything that expects an oci_image target, such as `oci_push`.
+
+    An implicit `oci_tarball` target is created for the image in question, which can be used to load
+    this image into a running docker daemon automatically for testing. This is named `name + "_load_docker"`.
+
+        ```sh
+        bazel run //path/to:<my_oci_image>_load_docker
+        ```
+
+    Args:
+        name: A unique name for this target.
+        binary: The name of the ${project}_py_binary to bundle in the container.
+        image_tags: A list of tags to apply to the image.
+        tars: A list of additional tar files to include in the image.
+        base: The base image to use for the container. If not provided, the default is "@python_base".
+        entrypoint: The entrypoint for the container. If not provided, it is inferred from the binary.
+        **kwargs: are passed to oci_image
+
+    Example:
+        ${project}_py_image(
+            name = "my_oci_image",
+            binary = "//path/to:my_py_binary",
+            tars = ["//path/to:my_extra_tar"],
+            base = "@python_base",
+            entrypoint = ["/my_py_binary/my_py_binary"],
+        )
+    """
+    # NOTE: We would ideally use the @distroless_base image here, which is about 140MB smaller,
+    # but rules_python depends on the host python toolchain to start a py_binary, so we need to
+    # use a base image that ships python.
+    #
+    # The rules_oci python example[1] instead uses aspect-build/rules_py, which is an improved
+    # set of python rules that has no dependencies on a host python. If we want to get to a pure
+    # distroless image, we should consider migrating to that.
+    #
+    # [1] - https://github.com/aspect-build/bazel-examples/tree/main/oci_python_image
+    base = base or "@python_base"
+
+    # If the user didn't provide an entrypoint, infer the one for the binary
+    bin_name = binary.split(":")[1]
+    entrypoint = entrypoint or ["/{}/{}".format(bin_name, bin_name)]
+
+    # Define the image we want to provide
+    oci_image(
+        name = name,
+        tars = tars + _py_layers(name, binary),
+        base = base,
+        entrypoint = entrypoint,
         **kwargs
     )
 
-def ${project}_py_image(name, binary = None, base = None, deps = [], layers = [], **kwargs):
-    """
-    A macro that generates a docker container to run a py_binary target.
+    # Transition the image to the platform we're building for
+    platform_transition_filegroup(
+        name = "platform_image",
+        srcs = [name],
+        target_platform = select({
+            "@platforms//cpu:arm64": "//tools/platforms:container_aarch64_linux",
+            "@platforms//cpu:x86_64": "//tools/platforms:container_x86_64_linux",
+        }),
+    )
 
-    Args:
-        name: A unique name for this target
-        binary (optional): A `${project}_py_binary` target to run in the container
-        layers (optional): Additional layers to bundle into the container.
-        deps (optional): Only valid if `binary` is not provided. The dependencies of the binary.
-        srcs (optional): Only valid if `binary` is not provided. The sources of the binary.
-        **kwargs: are passed to the new py_binary rule, if one is not created
-
-    Examples:
-        # Providing an existing `${project}_py_binary`
-        ${project}_py_image(
-            name = "${project}_container_bin",
-            binary = ":${project}",
-            visibility = ["//visibility:public"],
-        )
-
-        # Directly providing python sources to run
-        ${project}_py_image(
-            name = "${project}_container_src",
-            srcs = ["main.py"],
-            main = "main.py",
-            deps = [
-                requirement("numpy"),
-            ],
-            visibility = ["//visibility:public"],
-        )
-    """
-
-    # If the user didn't provide a binary, configure a new one for them.
-    if binary == None:
-        binary = name + "_docker_binary"
-
-        py_binary(
-            name = binary,
-            python_version = "PY3",
-            deps = deps + layers,
-            exec_compatible_with = ["@io_bazel_rules_docker//platforms:run_in_container"],
-            **kwargs
-        )
-    else:
-        # We can't use a provider in a macro, so instead we use the implicit output from the
-        # ${project}_py_binary that sets up an additional binary with the right toolchain
-        binary = binary + "_docker_binary"
-
-    # From here on out this is effectively identical to the upstream rules_docker py3_image macro
-
-    base = base or "//:hermetic_python_base_image"
-    tags = kwargs.get("tags", None)
-    for index, dep in enumerate(layers):
-        base = app_layer(name = "%s.%d" % (name, index), base = base, dep = dep, tags = tags)
-        base = app_layer(name = "%s.%d-symlinks" % (name, index), base = base, dep = dep, binary = binary, tags = tags)
-
-    visibility = kwargs.get("visibility", None)
-    app_layer(
-        name = name,
-        base = base,
-        entrypoint = ["/usr/bin/python"],
-        binary = binary,
-        visibility = visibility,
-        tags = tags,
-        args = kwargs.get("args"),
-        data = kwargs.get("data"),
-        testonly = kwargs.get("testonly"),
-        # The targets of the symlinks in the symlink layers are relative to the
-        # workspace directory under the app directory. Thus, create an empty
-        # workspace directory to ensure the symlinks are valid. See
-        # https://github.com/bazelbuild/rules_docker/issues/161 for details.
-        create_empty_workspace_dir = True,
+    # Create a tarball that can be loaded into a docker daemon
+    oci_tarball(
+        name = name + "_load_docker",
+        image = ":platform_image",
+        repo_tags = image_tags,
     )

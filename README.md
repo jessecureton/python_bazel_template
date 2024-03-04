@@ -1,12 +1,13 @@
 # Intro
-An opinionated template repo for Python projects using Bazel, built around the principle that
+An opinionated template repo for multi-lingual projects using Bazel, built around the principle that
 wherever possible projects should be hermetic and reproducible. It includes:
 
-- Automated linting for Bazel & Python sources with Buildifier, Flake8, Black, and Isort
+- Automated linting for Bazel, Python, and Golang sources with Buildifier, Flake8, Black, Isort, and
+  `go fmt`.
 - Python test helpers to simplify unit test targets
-- Hermetic Python toolchain
+- Hermetic Python & Golang toolchains
 - Hermetic pip dependencies sourced from requirements.txt
-- Python Docker image support, including a matching runtime version as the hermetic toolchain.
+- Python & Golang Docker image support, including a matching runtime version as the hermetic toolchains.
 
 It does not seek to provide a continual submodule that can pick up upstream changes from the
 template, but is more like a `create-react-app` template where you can eject from the template
@@ -20,15 +21,46 @@ to update paths for your project.
    https://docs.bazel.build/versions/master/install.html
 2. Run the template eject script, providing your project's name. `./eject.sh <project_name>`
 
-Note to Linux users:
-* Python pip requires libssl-dev to be installed (sudo apt-get install libssl-dev).
-* `py_binary()` uses the host's Python as a bootstrap for execing the hermetic Python under Bazel.
-   If you only have python3 installed you will need to symlink python to python3
-   (i.e. ln -s /usr/bin/python3 /usr/bin/python)
+**Note to Linux users:**
+`py_binary()` uses the host's Python as a bootstrap for execing the hermetic Python under Bazel.
+If you only have python3 installed you will need to symlink python to python3 (i.e. ln -s
+/usr/bin/python3 /usr/bin/python)
 
 # Development
 
 Pull requests are welcome! Open one against this repo and it will be reviewed & merged.
+
+## Adding New Dependencies
+
+### Python
+
+To add a new python pip dependency:
+
+1. Add the new dependency to `requirements.in`
+2. Run `bazel run //:requirements.update`
+3. Commit the updates to `requirements_lock.txt`
+
+### Golang
+
+To add a new golang dependency:
+
+1. Begin using the dependency in your Go code
+1. Run `bazel run @rules_go//go get <dependency>` to add the dependency to go.mod
+1. Run `bazel run @rules_go//go mod tidy` to pull in the transitive deps and update go.mod to show it as used
+1. Run `bazel run //:gazelle` to update your build files. This will print a warning like the following
+    ```
+    $ bazel run //:gazelle
+    WARNING: /Users/jcureton/development/personal/python_bazel_template/MODULE.bazel:39:24: The module extension go_deps defined in @gazelle//:extensions.bzl reported incorrect imports of repositories via use_repo():
+
+    Not imported, but reported as direct dependencies by the extension (may cause the build to fail):
+        io_rsc_quote
+
+    ** You can use the following buildozer command to fix these issues:
+
+    buildozer 'use_repo_add @gazelle//:extensions.bzl go_deps io_rsc_quote' //MODULE.bazel:all
+    ```
+1. Run the printed buildozer command with `bazel run -- //tools/buildozer ...`
+1. Commit the updates to go.mod, go.sum, MODULE.bazel, MODULE.bazel.lock, and any build files.
 
 ## Linting
 
@@ -61,10 +93,10 @@ explicitly unscoped. The currently-supported languages are:
 
 - Python
 - Golang
-  - Golang is limited at the moment and mostly exists just for hermetic Buildifier. Additional work
-    is likely required if you want to use arbitrary Go dependencies with Gazelle.
 
-### Running an interactive python session
+### Python
+
+#### Running an interactive python session
 You can run an interactive python session via either an ipython shell or a Jupyter notebook. By
 default, both include the `//${project}` bazel target so you can make use of ${project} code
 interactively.
@@ -76,3 +108,24 @@ interactively.
    Alternatively, consider downloading the notebook from the web UI if you will continue to need it.
 
 By default this includes the `//${project}` target, so you can make use of ${project} code interactively
+
+## Containerization
+
+We provide builtin `${project}_py_image` macros that make it easy to containerize any binary
+target. By default, these are built for the same architecture as the current host.
+
+You can manually override this and build for a different platform using the
+`--platforms=//tools/platforms:container_{arch}_linux` build flag.
+```bazel
+${project}_py_image(
+    name = "${project}_img",
+    binary = ":${project}_bin",
+    image_tags = ["${project}:latest"],
+)
+```
+```sh
+# Build default image for current host architecture and load it into docker
+bazel run //${project}:${project}_img_load_docker
+# Build default image for specific architecture
+bazel run --platforms=//tools/platforms:container_x86_64_linux //${project}:${project}_img_load_docker
+```
