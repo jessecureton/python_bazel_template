@@ -8,6 +8,12 @@ PY_VERSION = "3.11.6"
 GO_VERSION = "1.22.0"
 
 ########################################
+# Generic deps
+########################################
+bazel_dep(name = "aspect_bazel_lib", version = "2.5.1")
+bazel_dep(name = "platforms", version = "0.0.8")
+
+########################################
 # Set up rules_python and pip
 ########################################
 bazel_dep(name = "rules_python", version = "0.31.0")
@@ -40,7 +46,7 @@ go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
-    "com_github_stretchr_testify"
+    "com_github_stretchr_testify",
 )
 
 ########################################
@@ -59,3 +65,61 @@ bazel_dep(
 # Set up rules_pkg
 ########################################
 bazel_dep(name = "rules_pkg", version = "0.10.1")
+
+########################################
+# Set up hermetic C/C++ tools
+########################################
+# NOTE: We don't really use/support C/C++ in this repo, and if you need to you'll
+# almost certainly want your own proper toolchains to do so, but rules_oci requires
+# CC toolchains to be registered for packaging python interpreters, so we will cheat a
+# little using zig/hermetic_cc_toolchain to provide cross-compilation toolchains for
+# packaging OCI images.
+bazel_dep(name = "hermetic_cc_toolchain", version = "3.0.1")
+
+toolchains = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
+use_repo(toolchains, "zig_sdk")
+
+register_toolchains(
+    "@zig_sdk//toolchain:linux_amd64_gnu.2.31",
+    "@zig_sdk//toolchain:linux_arm64_gnu.2.31",
+)
+
+########################################
+# Set up rules_oci
+########################################
+bazel_dep(name = "rules_oci", version = "1.7.4")
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_base",
+    # 'latest' is not reproducible, but it's convenient.
+    # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
+    # values which you can use here in place of 'tag' to pin for reproducibility.
+    # tag = "latest",
+    digest = "sha256:9d4e5680d67c984ac9c957f66405de25634012e2d5d6dc396c4bdd2ba6ae569f",
+    image = "gcr.io/distroless/base",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
+)
+
+# See comment in //tools/rules/python:defs.bzl for a note on why we have to use this image
+# instead of the distroless version above for python images.
+oci.pull(
+    name = "python_base",
+    # NOTE: You can't use the `-alpine` version here, because it uses musl ligc, which is
+    # not compatible with the Python interpreter we receive/ship from rules_python. The
+    # `-slim` version uses glibc, which is compatible, and is the smallest glibc-based
+    # image available.
+    #tag = "{0}-slim".format(PY_VERSION),
+    digest = "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
+    image = "docker.io/library/python",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
+)
+
+# For each oci.pull call, repeat the "name" here to expose them as dependencies.
+use_repo(oci, "distroless_base", "python_base")

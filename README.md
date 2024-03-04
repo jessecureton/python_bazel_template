@@ -2,7 +2,8 @@
 An opinionated template repo for multi-lingual projects using Bazel, built around the principle that
 wherever possible projects should be hermetic and reproducible. It includes:
 
-- Automated linting for Bazel, Python, Golang, and Markdown sources with Buildifier, Flake8, Black, and Isort, Prettier, and `go fmt`.
+- Automated linting for Bazel, Python, and Golang sources with Buildifier, Flake8, Black, Isort, and
+  `go fmt`.
 - Python test helpers to simplify unit test targets
 - Hermetic Python & Golang toolchains
 - Hermetic pip dependencies sourced from requirements.txt
@@ -107,3 +108,24 @@ interactively.
    Alternatively, consider downloading the notebook from the web UI if you will continue to need it.
 
 By default this includes the `//${project}` target, so you can make use of ${project} code interactively
+
+## Containerization
+
+We provide builtin `${project}_py_image` macros that make it easy to containerize any binary
+target. By default, these are built for the same architecture as the current host.
+
+You can manually override this and build for a different platform using the
+`--platforms=//tools/platforms:container_{arch}_linux` build flag.
+```bazel
+${project}_py_image(
+    name = "${project}_img",
+    binary = ":${project}_bin",
+    image_tags = ["${project}:latest"],
+)
+```
+```sh
+# Build default image for current host architecture and load it into docker
+bazel run //${project}:${project}_img_load_docker
+# Build default image for specific architecture
+bazel run --platforms=//tools/platforms:container_x86_64_linux //${project}:${project}_img_load_docker
+```
