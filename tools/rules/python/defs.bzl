@@ -157,6 +157,7 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
             tars = ["//path/to:my_extra_tar"],
             base = "@python_base",
             entrypoint = ["/my_py_binary/my_py_binary"],
+            image_tags = ["my-tag:latest"],
         )
     """
     # NOTE: We would ideally use the @distroless_base image here, which is about 140MB smaller,
@@ -172,11 +173,16 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
 
     # If the user didn't provide an entrypoint, infer the one for the binary
     bin_name = binary.split(":")[1]
-    entrypoint = entrypoint or ["/{}/{}".format(bin_name, bin_name)]
+    workspace_path = ""
+    if binary.startswith("//"):
+        workspace_path = binary.split(":")[0][2:]
+    else:
+        workspace_path = native.package_name()
+    entrypoint = entrypoint or ["/{}/{}".format(workspace_path, bin_name)]
 
     # Define the image we want to provide
     oci_image(
-        name = name,
+        name = name + "_base_img",
         tars = tars + _py_layers(name, binary),
         base = base,
         entrypoint = entrypoint,
@@ -185,8 +191,8 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
 
     # Transition the image to the platform we're building for
     platform_transition_filegroup(
-        name = "platform_image",
-        srcs = [name],
+        name = name,
+        srcs = [name + "_base_img"],
         target_platform = select({
             "@platforms//cpu:arm64": "//tools/platforms:container_aarch64_linux",
             "@platforms//cpu:x86_64": "//tools/platforms:container_x86_64_linux",
@@ -196,6 +202,6 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
     # Create a tarball that can be loaded into a docker daemon
     oci_tarball(
         name = name + "_load_docker",
-        image = ":platform_image",
+        image = name,
         repo_tags = image_tags,
     )

@@ -21,6 +21,9 @@ ${project}_py_test(
     ],
 )
 
+# Build and run this image with
+#     bazel run //${project}:${project}_img_load_docker
+#     docker run --rm ${project}:latest
 ${project}_py_image(
     name = "${project}_img",
     binary = ":${project}",
