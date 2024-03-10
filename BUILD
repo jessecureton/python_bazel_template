@@ -2,7 +2,7 @@ load("@gazelle//:def.bzl", "gazelle")
 load("@rules_python//python:defs.bzl", "py_runtime_pair")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
-#load("@io_bazel_rules_docker//container:image.bzl", "container_image")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 
 # gazelle:map_kind go_binary ${project}_go_binary //tools/rules/golang:defs.bzl
 # gazelle:map_kind go_library ${project}_go_library //tools/rules/golang:defs.bzl
@@ -22,3 +22,5 @@ compile_pip_requirements(
     requirements_in = "requirements.in",
     requirements_txt = "requirements_lock.txt",
 )
+
+npm_link_all_packages(name = "node_modules")
