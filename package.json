@@ -1,0 +1,6 @@
+{
+  "fake-comment": "To update the pnpm lock file from this package.json, run `bazel run -- @pnpm//:pnpm --dir $PWD install --lockfile-only`",
+  "devDependencies": {
+    "prettier": "3.2.5"
+  }
+}

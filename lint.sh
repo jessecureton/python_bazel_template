@@ -55,4 +55,14 @@ GOFMT_ARGS=("")
 GOFMT_INVOCATION="bazel run -- @rules_go//go fmt ${GOFMT_ARGS[@]}"
 echo $GO_FILES | xargs ${GOFMT_INVOCATION}
 
+
+#################
+# Markdown Linting
+#################
+MARKDOWN_FILES=$(find ${REPO_ROOT} -type f -name "*.md" -print)
+PRETTIER_ARGS=("--write" "--config ${REPO_ROOT}/.prettierrc")
+PRETTIER_INVOCATION="bazel run -- //tools/prettier ${PRETTIER_ARGS[@]}"
+echo $MARKDOWN_FILES | xargs ${PRETTIER_INVOCATION}
+
+
 printf "\n✨ Linting completed successfully! ✨\n"
