@@ -1,7 +1,7 @@
 load("@aspect_bazel_lib//lib:tar.bzl", "mtree_spec", "tar")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
-load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 # These rules exist primarily as a way to provide a simple `main` wrapper for
 # py_test rules, so we don't have to provide a main stub for every test target.
@@ -74,6 +74,7 @@ def _py_layers(name, binary):
     Returns:
         A list of labels for the layers, which are tar files
     """
+
     # Produce layers in this order, as the app changes most often
     layers = ["interpreter", "packages", "app"]
 
@@ -160,6 +161,7 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
             image_tags = ["my-tag:latest"],
         )
     """
+
     # NOTE: We would ideally use the @distroless_base image here, which is about 140MB smaller,
     # but rules_python depends on the host python toolchain to start a py_binary, so we need to
     # use a base image that ships python.

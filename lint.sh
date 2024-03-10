@@ -24,17 +24,16 @@ BAZEL_FILES=$(find ${REPO_ROOT} -type f \
               -o -name "*.BUILD" \
               -o -name "BUILD.*.bazel" \
               -o -name "BUILD.*.oss" \
+              -o -name "MODULE.bazel" \
               -o -name "WORKSPACE" \
               -o -name "WORKSPACE.bazel" \
               -o -name "WORKSPACE.oss" \
               -o -name "WORKSPACE.*.bazel" \
               -o -name "WORKSPACE.*.oss" \) \
-              -o -name "MODULE.bazel" \
               -print)
-BUILDIFIER_ARGS=("-mode=fix" "-v=false")
+BUILDIFIER_ARGS=("-lint=fix" "-mode=fix" "-v=false")
 BUILDIFIER_INVOCATION="bazel run -- //tools/buildifier ${BUILDIFIER_ARGS[@]}"
 echo $BAZEL_FILES | xargs ${BUILDIFIER_INVOCATION}
-
 
 #################
 # Python linting
@@ -46,7 +45,6 @@ bazel run -- //tools/black ${REPO_ROOT}
 # Ensure flake8 compliance
 bazel run -- //tools/flake8 ${REPO_ROOT}
 
-
 #################
 # Go linting
 #################
@@ -54,7 +52,6 @@ GO_FILES=$(find ${REPO_ROOT} -type f -name "*.go" -print)
 GOFMT_ARGS=("")
 GOFMT_INVOCATION="bazel run -- @rules_go//go fmt ${GOFMT_ARGS[@]}"
 echo $GO_FILES | xargs ${GOFMT_INVOCATION}
-
 
 #################
 # Markdown Linting

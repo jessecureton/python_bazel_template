@@ -1,4 +1,4 @@
-load("//tools/rules/golang:defs.bzl", "${project}_go_binary", "${project}_go_library", "${project}_go_test", "${project}_go_image")
+load("//tools/rules/golang:defs.bzl", "${project}_go_binary", "${project}_go_image", "${project}_go_library", "${project}_go_test")
 
 ${project}_go_library(
     name = "golang-example_lib",
