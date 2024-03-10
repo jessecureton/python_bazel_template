@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "a48257efdcbf1ae496499d3f031b7469eaafdb98b304fafbf1d7f647c09a5514",
+  "moduleFileHash": "81badc8a4b3bb335efd1464c21b9769595edbeb26af8d9dfc65fd68eca4a3538",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -33,7 +33,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 21,
+            "line": 22,
             "column": 23
           },
           "imports": {},
@@ -48,7 +48,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 22,
+                "line": 23,
                 "column": 17
               }
             }
@@ -62,7 +62,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 27,
+            "line": 28,
             "column": 20
           },
           "imports": {
@@ -80,7 +80,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 28,
+                "line": 29,
                 "column": 10
               }
             }
@@ -94,7 +94,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 41,
+            "line": 42,
             "column": 23
           },
           "imports": {},
@@ -108,7 +108,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 42,
+                "line": 43,
                 "column": 16
               }
             },
@@ -120,7 +120,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 43,
+                "line": 44,
                 "column": 12
               }
             }
@@ -134,7 +134,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 45,
+            "line": 46,
             "column": 24
           },
           "imports": {
@@ -150,7 +150,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 46,
+                "line": 47,
                 "column": 18
               }
             }
@@ -164,7 +164,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 79,
+            "line": 80,
             "column": 27
           },
           "imports": {
@@ -181,12 +181,12 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 92,
+            "line": 93,
             "column": 20
           },
           "imports": {
             "distroless_base": "distroless_base",
-            "python_base": "python_base"
+            "ubuntu_base": "ubuntu_base"
           },
           "devImports": [],
           "tags": [
@@ -204,16 +204,16 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 93,
+                "line": 94,
                 "column": 9
               }
             },
             {
               "tagName": "pull",
               "attributeValues": {
-                "name": "python_base",
-                "digest": "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
-                "image": "docker.io/library/python",
+                "name": "ubuntu_base",
+                "digest": "sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b",
+                "image": "ubuntu",
                 "platforms": [
                   "linux/amd64",
                   "linux/arm64/v8"
@@ -222,7 +222,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 109,
+                "line": 107,
                 "column": 9
               }
             }
@@ -236,7 +236,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 143,
+            "line": 137,
             "column": 20
           },
           "imports": {
@@ -256,7 +256,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 147,
+                "line": 141,
                 "column": 23
               }
             }
@@ -270,7 +270,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 145,
+            "line": 139,
             "column": 21
           },
           "imports": {
@@ -288,6 +288,7 @@
         "aspect_bazel_lib": "aspect_bazel_lib@2.5.1",
         "platforms": "platforms@0.0.8",
         "rules_python": "rules_python@0.31.0",
+        "aspect_rules_py": "aspect_rules_py@0.7.1",
         "rules_go": "rules_go@0.46.0",
         "gazelle": "gazelle@0.35.0",
         "buildifier_prebuilt": "buildifier_prebuilt@6.4.0",
@@ -584,6 +585,73 @@
           "strip_prefix": "rules_python-0.31.0",
           "remote_patches": {
             "https://bcr.bazel.build/modules/rules_python/0.31.0/patches/module_dot_bazel_version.patch": "sha256-j2KF6j66J2fRAGtc56Zj7Hp1dTGqOWPAR3+IODr0oLQ="
+          },
+          "remote_patch_strip": 1
+        }
+      }
+    },
+    "aspect_rules_py@0.7.1": {
+      "name": "aspect_rules_py",
+      "version": "0.7.1",
+      "key": "aspect_rules_py@0.7.1",
+      "repoName": "aspect_rules_py",
+      "executionPlatformsToRegister": [],
+      "toolchainsToRegister": [
+        "@rules_py_tools//:all",
+        "@aspect_rules_py//py/private/toolchain/venv/...",
+        "@aspect_rules_py//py/private/toolchain/unpack/..."
+      ],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "@aspect_rules_py//py:extensions.bzl",
+          "extensionName": "py_tools",
+          "usingModule": "aspect_rules_py@0.7.1",
+          "location": {
+            "file": "https://bcr.bazel.build/modules/aspect_rules_py/0.7.1/MODULE.bazel",
+            "line": 16,
+            "column": 22
+          },
+          "imports": {
+            "rules_py_tools": "rules_py_tools"
+          },
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "rules_py_tools",
+              "attributeValues": {},
+              "devDependency": false,
+              "location": {
+                "file": "https://bcr.bazel.build/modules/aspect_rules_py/0.7.1/MODULE.bazel",
+                "line": 17,
+                "column": 21
+              }
+            }
+          ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        }
+      ],
+      "deps": {
+        "aspect_bazel_lib": "aspect_bazel_lib@2.5.1",
+        "bazel_skylib": "bazel_skylib@1.5.0",
+        "rules_python": "rules_python@0.31.0",
+        "platforms": "platforms@0.0.8",
+        "bazel_tools": "bazel_tools@_",
+        "local_config_platform": "local_config_platform@_"
+      },
+      "repoSpec": {
+        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "ruleClassName": "http_archive",
+        "attributes": {
+          "name": "aspect_rules_py~0.7.1",
+          "urls": [
+            "https://github.com/aspect-build/rules_py/releases/download/v0.7.1/rules_py-v0.7.1.tar.gz"
+          ],
+          "integrity": "sha256-a0fj4gr+9owz+w4QNGLWyjWjNCPGN0KVZsQSreVVp3g=",
+          "strip_prefix": "rules_py-0.7.1",
+          "remote_patches": {
+            "https://bcr.bazel.build/modules/aspect_rules_py/0.7.1/patches/rust_dev_dep.patch": "sha256-zpZuz+YgZOu1rLFYqWs58Qh8b01eswYO1vaNjpJUYpY=",
+            "https://bcr.bazel.build/modules/aspect_rules_py/0.7.1/patches/module_dot_bazel_version.patch": "sha256-iYDqbPGOkf3Kn82zICsBkKgJYBlvd/Dx/IJpyIro488="
           },
           "remote_patch_strip": 1
         }
@@ -2864,6 +2932,62 @@
         ]
       }
     },
+    "@@aspect_rules_py~0.7.1//py:extensions.bzl%py_tools": {
+      "general": {
+        "bzlTransitiveDigest": "45H27BWAspqkGo4ip1ZQzcDf20liU7ExtdHOJrk1Fn8=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "rules_py_tools": {
+            "bzlFile": "@@aspect_rules_py~0.7.1//py/private/toolchain:repo.bzl",
+            "ruleClassName": "toolchains_repo",
+            "attributes": {
+              "name": "aspect_rules_py~0.7.1~py_tools~rules_py_tools",
+              "user_repository_name": "rules_py_tools"
+            }
+          },
+          "rules_py_tools.darwin_arm64": {
+            "bzlFile": "@@aspect_rules_py~0.7.1//py/private/toolchain:tools.bzl",
+            "ruleClassName": "prebuilt_tool_repo",
+            "attributes": {
+              "name": "aspect_rules_py~0.7.1~py_tools~rules_py_tools.darwin_arm64",
+              "platform": "darwin_arm64"
+            }
+          },
+          "rules_py_tools.linux_arm64": {
+            "bzlFile": "@@aspect_rules_py~0.7.1//py/private/toolchain:tools.bzl",
+            "ruleClassName": "prebuilt_tool_repo",
+            "attributes": {
+              "name": "aspect_rules_py~0.7.1~py_tools~rules_py_tools.linux_arm64",
+              "platform": "linux_arm64"
+            }
+          },
+          "rules_py_tools.darwin_amd64": {
+            "bzlFile": "@@aspect_rules_py~0.7.1//py/private/toolchain:tools.bzl",
+            "ruleClassName": "prebuilt_tool_repo",
+            "attributes": {
+              "name": "aspect_rules_py~0.7.1~py_tools~rules_py_tools.darwin_amd64",
+              "platform": "darwin_amd64"
+            }
+          },
+          "rules_py_tools.linux_amd64": {
+            "bzlFile": "@@aspect_rules_py~0.7.1//py/private/toolchain:tools.bzl",
+            "ruleClassName": "prebuilt_tool_repo",
+            "attributes": {
+              "name": "aspect_rules_py~0.7.1~py_tools~rules_py_tools.linux_amd64",
+              "platform": "linux_amd64"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "aspect_rules_py~0.7.1",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
     "@@bazel_features~1.1.1//private:extensions.bzl%version_extension": {
       "general": {
         "bzlTransitiveDigest": "xm7Skm1Las5saxzFWt2hbS+e68BWi+MXyt6+lKIhjPA=",
@@ -4649,19 +4773,6 @@
               "platform": "windows_amd64"
             }
           },
-          "python_base_linux_amd64": {
-            "bzlFile": "@@rules_oci~1.7.4//oci/private:pull.bzl",
-            "ruleClassName": "oci_pull",
-            "attributes": {
-              "name": "rules_oci~1.7.4~oci~python_base_linux_amd64",
-              "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/python",
-              "identifier": "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
-              "platform": "linux/amd64",
-              "target_name": "python_base_linux_amd64"
-            }
-          },
           "jq": {
             "bzlFile": "@@aspect_bazel_lib~2.5.1//lib/private:jq_toolchain.bzl",
             "ruleClassName": "jq_host_alias_repo",
@@ -4676,19 +4787,6 @@
               "name": "rules_oci~1.7.4~oci~oci_crane_darwin_amd64",
               "platform": "darwin_amd64",
               "crane_version": "v0.18.0"
-            }
-          },
-          "python_base_linux_arm64_v8": {
-            "bzlFile": "@@rules_oci~1.7.4//oci/private:pull.bzl",
-            "ruleClassName": "oci_pull",
-            "attributes": {
-              "name": "rules_oci~1.7.4~oci~python_base_linux_arm64_v8",
-              "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/python",
-              "identifier": "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
-              "platform": "linux/arm64/v8",
-              "target_name": "python_base_linux_arm64_v8"
             }
           },
           "jq_darwin_amd64": {
@@ -4899,6 +4997,19 @@
               "version": "1.7"
             }
           },
+          "ubuntu_base_linux_arm64_v8": {
+            "bzlFile": "@@rules_oci~1.7.4//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "name": "rules_oci~1.7.4~oci~ubuntu_base_linux_arm64_v8",
+              "scheme": "https",
+              "registry": "index.docker.io",
+              "repository": "library/ubuntu",
+              "identifier": "sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b",
+              "platform": "linux/arm64/v8",
+              "target_name": "ubuntu_base_linux_arm64_v8"
+            }
+          },
           "yq_darwin_amd64": {
             "bzlFile": "@@aspect_bazel_lib~2.5.1//lib/private:yq_toolchain.bzl",
             "ruleClassName": "yq_platform_repo",
@@ -4917,22 +5028,35 @@
               "crane_version": "v0.18.0"
             }
           },
-          "python_base": {
+          "ubuntu_base": {
             "bzlFile": "@@rules_oci~1.7.4//oci/private:pull.bzl",
             "ruleClassName": "oci_alias",
             "attributes": {
-              "name": "rules_oci~1.7.4~oci~python_base",
-              "target_name": "python_base",
+              "name": "rules_oci~1.7.4~oci~ubuntu_base",
+              "target_name": "ubuntu_base",
               "scheme": "https",
               "registry": "index.docker.io",
-              "repository": "library/python",
-              "identifier": "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
+              "repository": "library/ubuntu",
+              "identifier": "sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b",
               "platforms": {
-                "@@platforms//cpu:x86_64": "@python_base_linux_amd64",
-                "@@platforms//cpu:arm64": "@python_base_linux_arm64_v8"
+                "@@platforms//cpu:x86_64": "@ubuntu_base_linux_amd64",
+                "@@platforms//cpu:arm64": "@ubuntu_base_linux_arm64_v8"
               },
-              "bzlmod_repository": "python_base",
+              "bzlmod_repository": "ubuntu_base",
               "reproducible": true
+            }
+          },
+          "ubuntu_base_linux_amd64": {
+            "bzlFile": "@@rules_oci~1.7.4//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "name": "rules_oci~1.7.4~oci~ubuntu_base_linux_amd64",
+              "scheme": "https",
+              "registry": "index.docker.io",
+              "repository": "library/ubuntu",
+              "identifier": "sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b",
+              "platform": "linux/amd64",
+              "target_name": "ubuntu_base_linux_amd64"
             }
           },
           "jq_linux_amd64": {

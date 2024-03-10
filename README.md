@@ -27,11 +27,8 @@ update paths for your project.
 
 1. Install Bazel. Instructions for doing so can be found here:
    https://docs.bazel.build/versions/master/install.html
+   - Also consider using `bazelisk` to automatically install the proper bazel version
 2. Run the template eject script, providing your project's name. `./eject.sh <project_name>`
-
-**Note to Linux users:** `py_binary()` uses the host's Python as a bootstrap for execing the
-hermetic Python under Bazel. If you only have python3 installed you will need to symlink python to
-python3 (i.e. ln -s /usr/bin/python3 /usr/bin/python)
 
 # Development
 

@@ -11,4 +11,7 @@ def test_main(capsys):
 
 
 def test_hermetic_python():
-    assert "runfiles/rules_python" in sys.executable
+    """Test that we're using the hermetic Python binary + venv from runfiles."""
+    assert "bazel-out" in sys.executable
+    assert ".runfiles" in sys.executable
+    assert ".venv/bin/python" in sys.executable

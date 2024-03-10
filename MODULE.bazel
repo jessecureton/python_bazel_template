@@ -17,6 +17,7 @@ bazel_dep(name = "platforms", version = "0.0.8")
 # Set up rules_python and pip
 ########################################
 bazel_dep(name = "rules_python", version = "0.31.0")
+bazel_dep(name = "aspect_rules_py", version = "0.7.1")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
@@ -103,18 +104,11 @@ oci.pull(
         "linux/arm64/v8",
     ],
 )
-
-# See comment in //tools/rules/python:defs.bzl for a note on why we have to use this image
-# instead of the distroless version above for python images.
 oci.pull(
-    name = "python_base",
-    # NOTE: You can't use the `-alpine` version here, because it uses musl ligc, which is
-    # not compatible with the Python interpreter we receive/ship from rules_python. The
-    # `-slim` version uses glibc, which is compatible, and is the smallest glibc-based
-    # image available.
-    #tag = "{0}-slim".format(PY_VERSION),
-    digest = "sha256:cc758519481092eb5a4a5ab0c1b303e288880d59afc601958d19e95b300bc86b",
-    image = "docker.io/library/python",
+    name = "ubuntu_base",
+    # tag = "24.04",
+    digest = "sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b",
+    image = "ubuntu",
     platforms = [
         "linux/amd64",
         "linux/arm64/v8",
@@ -122,7 +116,7 @@ oci.pull(
 )
 
 # For each oci.pull call, repeat the "name" here to expose them as dependencies.
-use_repo(oci, "distroless_base", "python_base")
+use_repo(oci, "distroless_base", "ubuntu_base")
 
 ########################################
 # Set up rules_js

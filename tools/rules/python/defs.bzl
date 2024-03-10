@@ -1,7 +1,7 @@
 load("@aspect_bazel_lib//lib:tar.bzl", "mtree_spec", "tar")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_library", "py_test")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
-load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 # These rules exist primarily as a way to provide a simple `main` wrapper for
 # py_test rules, so we don't have to provide a main stub for every test target.
@@ -162,16 +162,7 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
         )
     """
 
-    # NOTE: We would ideally use the @distroless_base image here, which is about 140MB smaller,
-    # but rules_python depends on the host python toolchain to start a py_binary, so we need to
-    # use a base image that ships python.
-    #
-    # The rules_oci python example[1] instead uses aspect-build/rules_py, which is an improved
-    # set of python rules that has no dependencies on a host python. If we want to get to a pure
-    # distroless image, we should consider migrating to that.
-    #
-    # [1] - https://github.com/aspect-build/bazel-examples/tree/main/oci_python_image
-    base = base or "@python_base"
+    base = base or "@ubuntu_base"
 
     # If the user didn't provide an entrypoint, infer the one for the binary
     bin_name = binary.split(":")[1]
@@ -180,7 +171,10 @@ def ${project}_py_image(name, binary, image_tags, tars = [], base = None, entryp
         workspace_path = binary.split(":")[0][2:]
     else:
         workspace_path = native.package_name()
-    entrypoint = entrypoint or ["/{}/{}".format(workspace_path, bin_name)]
+
+    # TODO: Once aspect-build/rules_py#229 makes it into a rules_py release, we can use the
+    # entrypoint directly without this `bash <entrypoint>` workaround.
+    entrypoint = entrypoint or ["bash", "/{}/{}".format(workspace_path, bin_name)]
 
     # Define the image we want to provide
     oci_image(
