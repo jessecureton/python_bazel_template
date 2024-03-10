@@ -69,6 +69,7 @@ def _go_layers(name, binary):
     Returns:
         A list of labels for the generated layers, which are tar files.
     """
+
     # The order of the layers here should be from least to most frequently changing.
     layers = ["app"]
 
@@ -147,6 +148,7 @@ def ${project}_go_image(name, binary, image_tags, include_runfiles = True, tars 
         workspace_path = binary.split(":")[0][2:]
     else:
         workspace_path = native.package_name()
+
     # Outputs from go_binary targets add an extra directory with a random underscore to the path
     entrypoint = entrypoint or ["/{}/{}_/{}".format(workspace_path, bin_name, bin_name)]
 

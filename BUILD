@@ -1,8 +1,7 @@
 load("@gazelle//:def.bzl", "gazelle")
-load("@rules_python//python:defs.bzl", "py_runtime_pair")
-load("@rules_python//python:pip.bzl", "compile_pip_requirements")
-load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
 # gazelle:map_kind go_binary ${project}_go_binary //tools/rules/golang:defs.bzl
 # gazelle:map_kind go_library ${project}_go_library //tools/rules/golang:defs.bzl

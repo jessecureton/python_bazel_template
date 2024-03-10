@@ -1,4 +1,3 @@
-
 platform(
     name = "container_aarch64_linux",
     constraint_values = [
