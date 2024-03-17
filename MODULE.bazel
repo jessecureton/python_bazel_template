@@ -16,7 +16,10 @@ bazel_dep(name = "platforms", version = "0.0.8")
 ########################################
 # Set up rules_python and pip
 ########################################
-bazel_dep(name = "rules_python", version = "0.31.0")
+_RULES_PY_VERSION = "0.31.0"
+
+bazel_dep(name = "rules_python", version = _RULES_PY_VERSION)
+bazel_dep(name = "rules_python_gazelle_plugin", version = _RULES_PY_VERSION)
 bazel_dep(name = "aspect_rules_py", version = "0.7.1")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
@@ -37,13 +40,19 @@ use_repo(pip, "pip")
 # Set up rules_go
 ########################################
 bazel_dep(name = "rules_go", version = "0.46.0")
-bazel_dep(name = "gazelle", version = "0.35.0")
+bazel_dep(name = "gazelle", version = "0.35.0", repo_name = "bazel_gazelle")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = GO_VERSION)
-go_sdk.nogo(nogo = "//:nogo")
+go_sdk.nogo(
+    # We only want to nogo our own go code inside our project directory
+    includes = [
+        "//${project}:__subpackages__",
+    ],
+    nogo = "//:nogo",
+)
 
-go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
+go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
