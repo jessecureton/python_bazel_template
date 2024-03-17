@@ -1,6 +1,13 @@
 load("//tools/rules/python:defs.bzl", "${project}_py_binary", "${project}_py_image", "${project}_py_test")
 
+# Set the prefix for Golang packages to be here
 # gazelle:prefix github.com/example/${project}
+
+# Tell gazelle that are python root is the same dir as this Bazel package.
+# (It's unclear to me if this is actually required or even appropriate, but
+#  it definitely works and it seems best to /not/ have //tools in the python path)
+# gazelle:python_root
+# gazelle:resolve py ${project} //${project}
 
 ${project}_py_binary(
     name = "${project}",
@@ -9,7 +16,6 @@ ${project}_py_binary(
     ]),
     main = "main.py",
     visibility = ["//visibility:public"],
-    deps = [],
 )
 
 ${project}_py_test(

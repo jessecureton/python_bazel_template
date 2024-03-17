@@ -1,6 +1,6 @@
 import sys
 
-from ${project}.main import main
+from ${project}.foo import main
 
 
 def test_main(capsys):
